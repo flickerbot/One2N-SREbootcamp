@@ -44,7 +44,7 @@ DATABASE_URL=sqlite:///students.db
 python student.py
 ```
 
-### **5. Test API Endpoints
+### **5. Test API Endpoints**
 
 **Add a Student (POST)**
 
