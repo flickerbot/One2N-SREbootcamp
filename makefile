@@ -1,10 +1,10 @@
 # Makefile for Student Management API
 
-# # Load environment variables from .env file
-# ifneq (,$(wildcard .env))
-#     include .env
-#     export
-# endif
+# Load environment variables from .env file
+ifneq (,$(wildcard .env))
+    include .env
+    export
+endif
 
 # # Default values if not set in .env
 # VENV ?= venv
@@ -67,4 +67,4 @@ all: clean setup migrate
 
 
 
-# why is the urpose of the .PHONY https://stackoverflow.com/questions/2145590/what-is-the-purpose-of-phony-in-a-makefile
+# why is the purpose of the .PHONY https://stackoverflow.com/questions/2145590/what-is-the-purpose-of-phony-in-a-makefile
