@@ -89,4 +89,4 @@ def delete_student(id):
     return jsonify({'message': 'Student deleted successfully'}), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host=os.getenv('HOST_PORT'), port=os.getenv('APP_PORT'), debug=True)

@@ -65,6 +65,24 @@ clean:
 all: clean setup migrate
 
 
+#docker_setup
+.PHONY: docker-build
+docker-build:
+	@echo "Building Docker image $(IMAGE_TAG)..."
+	docker build -t student:$(IMAGE_TAG) .
+	@echo "Docker image built successfully."
+
+#docker_setup
+.PHONY: docker-run
+docker-run:
+	docker run -it \
+	    --env-file .env \
+		-e FLASK_HOST=$(HOST_PORT) \
+		-e FLASK_PORT=$(APP_PORT) \
+		-p $(APP_PORT):$(APP_PORT) \
+		student:$(IMAGE_TAG)
+	@echo "Docker container started. Access the API at http://localhost:$(APP_PORT)"
+
 
 
 # why is the purpose of the .PHONY https://stackoverflow.com/questions/2145590/what-is-the-purpose-of-phony-in-a-makefile

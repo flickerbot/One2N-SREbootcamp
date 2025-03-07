@@ -1,3 +1,4 @@
 flask==3.0.2
 flask-sqlalchemy
 python-dotenv
+flask-migrate
