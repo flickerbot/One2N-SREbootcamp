@@ -14,12 +14,12 @@ This is a REST API built using Python and Flask to manage student records. The A
 
 ##Prerequisites
 
-Python 3.8+ 
-pip - Python package manager
-Git - Version control system to clone the repository
-Make - Build automation tool used for running commands
-Docker - Container platform (required only for Docker setup)
-curl - Command-line tool for testing API endpoints (optional)
+- **Python 3.8+** 
+- **pip** - Python package manager
+- **Git** - Version control system to clone the repository
+- **Make** - Build automation tool used for running commands
+- **Docker** - Container platform (required only for Docker setup)
+- **curl** - Command-line tool for testing API endpoints (optional)
 
 
 
