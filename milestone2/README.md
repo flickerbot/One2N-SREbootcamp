@@ -51,7 +51,7 @@ pip install -r requirements.txt
 #### **4. Set Up Environment Variables**
 Create a `.env` file in the project root with the following contents:
 ```
-DATABASE_URL=mysql+pymysql://admin:password@localhost:3306/student_db
+DATABASE_URL=mysql+pymysql://admin:password@localhost:3306/student_db  #replace the admin:password with the respective user and password in mysql. To use same user and password refrer to end of this readme.
 HOSTPORT=0.0.0.0
 APP_PORT=5000
 FLASK_APP=student.py
@@ -80,7 +80,8 @@ cd One2N-SREbootcamp/milestone2
 #### **2. Create a .env File**
 Create a `.env` file in the project root with the following contents:
 ```
-DATABASE_URL=mysql+pymysql://admin:password@localhost:3306/student_db
+DATABASE_URL=mysql+pymysql://admin:password@localhost:3306/student_db    
+-- pass correct user and password at palce of admin:password. To create new user admin refer to end of this document 
 HOSTPORT=0.0.0.0
 APP_PORT=5000
 FLASK_APP=student.py
@@ -182,4 +183,22 @@ make create-migration
 To apply pending migrations:
 ```bash
 make migrate
+```
+
+### Creating user admin in mysql 
+
+```bash
+
+-- Log in as root or a user with admin privileges:
+mysql -u root -p
+
+-- Create user (replace 'password' with your actual password):
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'password';
+
+-- Grant all privileges on student_db:
+GRANT ALL PRIVILEGES ON student_db.* TO 'admin'@'localhost';
+
+-- Flush privileges to apply changes:
+FLUSH PRIVILEGES;
+
 ```
