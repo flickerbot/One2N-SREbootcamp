@@ -81,6 +81,7 @@ docker-run:
 		-e FLASK_PORT=$(APP_PORT) \
 		-p $(APP_PORT):$(APP_PORT) \
 		-e RUN_MIGRATIONS=$(RUN_MIGRATIONS) \
+		$(if $(NETWORK_MODE),--network $(NETWORK_MODE),) \
 		student:$(IMAGE_TAG)
 	@echo "Docker container started. Access the API at http://localhost:$(APP_PORT)"
 
