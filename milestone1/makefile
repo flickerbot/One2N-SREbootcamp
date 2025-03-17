@@ -21,7 +21,9 @@ help:
 	@echo "  run          - Run the Flask application"
 	@echo "  migrate      - Run database migrations"
 	@echo "  create-migration - Create a new database migration"
+	@echo "  test       - testing the api using unittest"
 	@echo "  clean        - Clean up project files"
+
 
 
 # Install dependencies
@@ -49,6 +51,14 @@ migrate:
 create-migration:
 	@read -p "Enter migration description: " desc; \
 	flask db migrate -m "$$desc"
+
+
+#testing the API 
+.PHONY: test
+
+test:
+	@echo "Running API tests..."
+	python -m unittest test.py
 
 # Clean up project files
 .PHONY: clean
