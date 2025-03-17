@@ -81,7 +81,7 @@ make create-migration
 ```bash
 make run
 ```
-#### **6. To run unitest **
+#### **7. To run unitest**
 ```bash
 make test
 ```
