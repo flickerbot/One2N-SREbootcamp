@@ -43,24 +43,12 @@ namevenv\Scripts\activate      # Windows
 ```bash
 make setup
 ```
+ 
 
 #### **4. Set Up Environment Variables**
 
-Create a `.env` file in the project root with the following contents:
+Create a `.env` file in the project root, you can refer the `.env.example` file for reference:
 
-```
-DATABASE_URL=mysql+pymysql://admin:password@localhost:3306/student_db
-#replace the admin:password with the respective user and password in mysql. To use same user and password refer to end of this readme.
-HOSTPORT=0.0.0.0
-APP_PORT=5000
-FLASK_APP=student.py
-MYSQL_USER=admin
-MYSQL_PASSWORD=password
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_DATABASE=student_db
-
-```
 
 #### **5 Database Migrations**
 
