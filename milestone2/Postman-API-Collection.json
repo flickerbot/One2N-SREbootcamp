@@ -1,0 +1,112 @@
+{
+    "info": {
+      "name": "Student CRUD REST API",
+      "description": "Postman Collection for Student CRUD API built with Flask",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Health Check",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://127.0.0.1:5000/healthcheck",
+            "protocol": "http",
+            "host": ["127.0.0.1"],
+            "port": "5000",
+            "path": ["healthcheck"]
+          }
+        }
+      },
+      {
+        "name": "Add a Student",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"name\": \"John Doe\",\n  \"age\": 20,\n  \"grade\": \"A\"\n}"
+          },
+          "url": {
+            "raw": "http://127.0.0.1:5000/api/v1/students",
+            "protocol": "http",
+            "host": ["127.0.0.1"],
+            "port": "5000",
+            "path": ["api", "v1", "students"]
+          }
+        }
+      },
+      {
+        "name": "Get All Students",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://127.0.0.1:5000/api/v1/students",
+            "protocol": "http",
+            "host": ["127.0.0.1"],
+            "port": "5000",
+            "path": ["api", "v1", "students"]
+          }
+        }
+      },
+      {
+        "name": "Get Student by ID",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://127.0.0.1:5000/api/v1/students/1",
+            "protocol": "http",
+            "host": ["127.0.0.1"],
+            "port": "5000",
+            "path": ["api", "v1", "students", "1"]
+          }
+        }
+      },
+      {
+        "name": "Update a Student",
+        "request": {
+          "method": "PUT",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"name\": \"John Updated\",\n  \"age\": 21,\n  \"grade\": \"A+\"\n}"
+          },
+          "url": {
+            "raw": "http://127.0.0.1:5000/api/v1/students/1",
+            "protocol": "http",
+            "host": ["127.0.0.1"],
+            "port": "5000",
+            "path": ["api", "v1", "students", "1"]
+          }
+        }
+      },
+      {
+        "name": "Delete a Student",
+        "request": {
+          "method": "DELETE",
+          "header": [],
+          "url": {
+            "raw": "http://127.0.0.1:5000/api/v1/students/1",
+            "protocol": "http",
+            "host": ["127.0.0.1"],
+            "port": "5000",
+            "path": ["api", "v1", "students", "1"]
+          }
+        }
+      }
+    ]
+  }
+  
