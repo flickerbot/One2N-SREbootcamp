@@ -81,6 +81,10 @@ make create-migration
 ```bash
 make run
 ```
+#### **6. To run unitest **
+```bash
+make test
+```
 
 ## Testing API Endpoints
 
