@@ -4,3 +4,4 @@ python-dotenv
 flask-migrate
 pymysql
 cryptography
+pylint
