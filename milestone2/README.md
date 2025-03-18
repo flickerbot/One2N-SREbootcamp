@@ -11,15 +11,16 @@ This is a REST API built using Python and Flask to manage student records. The A
 - Delete a student
 - Check API health status
 
-##Prerequisites
+## Prerequisites
 
 - **Python 3.8+**
 - **Mysql 8.0.41**
 - **pip** - Python package manager
 - **Git** - Version control system to clone the repository
 - **Make** - Build automation tool used for running commands
-- **Docker** - Container platform (required only for Docker setup)
+- **Docker** - Container platform 
 - **curl** - Command-line tool for testing API endpoints (optional)
+
 
 ## Setup Instructions
 
@@ -33,20 +34,19 @@ cd One2N-SREbootcamp/milestone2
 #### **2. Create a Virtual Environment**
 
 ```bash
-python -m venv namevenv
+python3 -m venv namevenv
 source namevenv/bin/activate   # macOS/Linux
 namevenv\Scripts\activate      # Windows
 ```
 
-#### **3. Install Dependencies**
-
-```bash
-make setup
-```
-
-#### **4. Set Up Environment Variables**
+#### **3. Set Up Environment Variables**
 
 Create a `.env` file in the project root, you can refer the `.env.example` file for reference:
+
+#### **4 Install Dependencies**
+```
+make setup
+```
 
 #### **5 Database Migrations**
 
@@ -73,31 +73,39 @@ To create a new migration after changing your models:
 ```bash
 make create-migration
 ```
+### Example Model Change
 
-#### **6. Start the API Server**
+If you want to add a new column email to the Student model, modify the model in models.py
+```bash
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    grade = db.Column(db.String(10), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)  # New column
+```
+Then, create and apply the migration:
 
 ```bash
-make run
+make create-migration
+make migrate
+```
+
+If you need to revert to the previous database schema
+
+```bash
+make downgrade
 ```
 
 
-### ** Docker Setup**
 
-#### **1. Clone the Repository**
-```bash
-git clone https://github.com/flickerbot/One2N-SREbootcamp.git
-cd One2N-SREbootcamp/milestone2
-```
 
-#### **2. Create a .env File**
-Create a `.env` file in the project root, you can refer the `.env.example` file for reference:
-
-#### **3. Build the Docker Image**
+#### **6. Build the Docker Image**
 ```bash
 make docker-build IMAGE_TAG=1.0.0
 ```
 
-#### **4. Run the Docker Container**
+#### **7. Run the Docker Container**
 
 **With Migrations (Only needed for initial setup or schema changes):**
 
@@ -123,6 +131,8 @@ make docker-run IMAGE_TAG=1.0.0 NETWORK_MODE=host
 make docker-run IMAGE_TAG=1.0.0 HOST=0.0.0.0 PORT=5000 NETWORK_MODE=host
 
 ```
+
+
 
 ## Testing API Endpoints
 
