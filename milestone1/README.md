@@ -28,12 +28,13 @@ This is a REST API built using Python and Flask to manage student records. The A
 ```bash
 git clone https://github.com/flickerbot/One2N-SREbootcamp.git
 cd One2N-SREbootcamp/milestone1
+
 ```
 
 #### **2. Create a Virtual Environment**
 
 ```bash
-python -m venv namevenv
+python3 -m venv namevenv
 source namevenv/bin/activate   # macOS/Linux
 namevenv\Scripts\activate      # Windows
 ```
@@ -76,6 +77,34 @@ To create a new migration after changing your models:
 make create-migration
 ```
 
+### Example Model Change
+
+If you want to add a new column email to the Student model, modify the model in student.py
+```bash
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    grade = db.Column(db.String(10), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)  # New column
+```
+
+Then, create and apply the migration:
+
+```bash
+make create-migration
+make migrate
+```
+
+If you need to revert to the previous database schema
+
+```bash
+make downgrade
+```
+
+
+
+
 #### **6. Start the API Server**
 
 ```bash
@@ -85,6 +114,11 @@ make run
 ```bash
 make test
 ```
+#### **8. To lint the code**
+```bash
+make lint
+```
+
 
 ## Testing API Endpoints
 

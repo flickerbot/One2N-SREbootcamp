@@ -21,7 +21,7 @@ help:
 	@echo "  run          - Run the Flask application"
 	@echo "  migrate      - Run database migrations"
 	@echo "  create-migration - Create a new database migration"
-	@echo "  test       - testing the api using unittest"
+	@echo "  test         - testing the api using unittest"
 	@echo "  clean        - Clean up project files"
 
 
@@ -52,13 +52,28 @@ create-migration:
 	@read -p "Enter migration description: " desc; \
 	flask db migrate -m "$$desc"
 
+# Downgrade migration
+.PHONY: downgrade
+downgrade:
+	@echo "reverting to previous database migrations..."
+	flask db downgrade
+
+
 
 #testing the API 
 .PHONY: test
-
 test:
 	@echo "Running API tests..."
 	python -m unittest test.py
+
+
+.PHONY: lint
+lint:
+	@echo "Running linting ..."
+	pylint student.py
+
+
+
 
 # Clean up project files
 .PHONY: clean
