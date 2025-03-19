@@ -1,27 +1,26 @@
-# Build the base image -> Stage 1
 FROM python:alpine as baseimage
-# Create nonroot-user with specific user ID 1234
-RUN adduser -u 1234 -D tempuser
+# Create app-specific user 
+RUN adduser -u 10001 -D flaskapp
 RUN mkdir /app
 COPY requirements.txt /app/
 WORKDIR /app
 
-USER tempuser
+USER flaskapp
 RUN pip install --user -r requirements.txt
 
-# App run -> Stage 2
+
 FROM python:alpine
-# Create the same nonroot-user in the second stage
-RUN adduser -u 1234 -D tempuser
+# Create the same app-specific user 
+RUN adduser -u 10001 -D flaskapp
 WORKDIR /app
-COPY --from=baseimage /home/tempuser/.local /home/tempuser/.local
+COPY --from=baseimage /home/flaskapp/.local /home/flaskapp/.local
 COPY student.py /app/
 COPY migrations /app/migrations
 COPY entrypoint.sh /app/
 RUN chmod +x /app/entrypoint.sh
 
-RUN chown -R tempuser:tempuser /app
-USER tempuser
+RUN chown -R flaskapp:flaskapp /app
+USER flaskapp
 ENV FLASK_APP=student.py
-ENV PATH=/home/tempuser/.local/bin:$PATH
+ENV PATH=/home/flaskapp/.local/bin:$PATH
 CMD ["/app/entrypoint.sh"]

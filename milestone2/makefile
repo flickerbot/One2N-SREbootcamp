@@ -13,18 +13,6 @@ endif
 # FLASK_APP ?= student.py
 # PYTEST ?= pytest
 
-# Phony targets ensure these commands always run
-.PHONY: help
-help:
-	@echo "Available targets:"
-	@echo "  setup        - Install dependencies"
-	@echo "  run          - Run the Flask application"
-	@echo "  test         - Run tests"
-	@echo "  migrate      - Run database migrations"
-	@echo "  create-migration - Create a new database migration"
-	@echo "  clean        - Clean up project files"
-
-
 # Install dependencies
 .PHONY: setup
 setup:
@@ -32,12 +20,17 @@ setup:
 	pip install -r requirements.txt
 	@echo "Dependencies installed successfully."
 
-# Run the Flask application
-.PHONY: run
-run:
-	@echo "Running application on ${HOSTPORT}:${APP_PORT}"
-	flask -A ${FLASK_APP} run --host=${HOSTPORT} --port=${APP_PORT}
 
+# Phony targets ensure these commands always run
+.PHONY: help
+help:
+	@echo "Available targets:"
+	@echo "  setup        - Install dependencies"
+	@echo "  test         - Run tests"
+	@echo "  migrate      - Run database migrations"
+	@echo "  create-migration - Create a new database migration"
+	@echo "  clean        - Clean up project files"
+    @echo "  downgrade    - Downgrade the db"
 
 # Database Migrations
 .PHONY: migrate
@@ -50,6 +43,13 @@ migrate:
 create-migration:
 	@read -p "Enter migration description: " desc; \
 	flask db migrate -m "$$desc"
+
+# Downgrade migration
+.PHONY: downgrade
+downgrade:
+	@echo "reverting to previous database migrations..."
+	flask db downgrade
+
 
 # Clean up project files
 .PHONY: clean
@@ -76,7 +76,6 @@ docker-build:
 .PHONY: docker-run
 docker-run:
 	docker run -it \
-	    --env-file .env \
 		-e FLASK_HOST=$(HOST_PORT) \
 		-e FLASK_PORT=$(APP_PORT) \
 		-p $(APP_PORT):$(APP_PORT) \
