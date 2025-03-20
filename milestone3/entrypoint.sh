@@ -4,11 +4,6 @@
 set -e  
 
 
-echo "Waiting for database to be ready..."
-while ! mysqladmin ping -h"db" --silent; do
-    sleep 2
-done
-
 #flask migartion next step will only be executed when migrations are complete 
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Running database migrations..."
@@ -28,6 +23,6 @@ else
 fi
 
 # Start Flask application
-
 echo "Starting Flask API..."
-exec flask run --host="${FLASK_HOST}" --port="${FLASK_PORT}"
+exec flask run --host="${FLASK_HOST}" --port="${FLASK_PORT}"  
+  #exec flask run --host=0.0.0.0 --port=5000
