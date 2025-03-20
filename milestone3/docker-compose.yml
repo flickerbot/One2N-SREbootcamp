@@ -5,12 +5,12 @@ services:
     container_name: db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: password
-      MYSQL_DATABASE: student_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
-      - "3307:3306"
+      - "${MYSQL_PORT_HOST:-3307}:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -19,19 +19,24 @@ services:
       retries: 3
       start_period: 10s
       timeout: 10s
+  
   api:
     build: .
-    container_name: student_api
+    image: student:${IMAGE_TAG}
+    container_name: api
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      FLASK_HOST: "0.0.0.0"
-      FLASK_PORT: "5000"
-      DATABASE_URL: "mysql+pymysql://admin:password@db:3306/student_db"
-      RUN_MIGRATIONS: "true"
+      FLASK_HOST: ${FLASK_HOST}
+      FLASK_PORT: ${FLASK_PORT}
+      DATABASE_URL: "mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}"
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS}
+
     ports:
       - "5000:5000"
     entrypoint: ["/app/entrypoint.sh"]
+
 volumes:
   db_data:
