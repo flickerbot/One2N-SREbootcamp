@@ -50,10 +50,10 @@ If you want to quickly set up the entire environment with a single command:
 
 ```bash
 # Start everything (database, migrations, API)
-make up
+make up IMAGE_TAG=1.0.0
 
 # When finished, shut everything down
-make down
+make down IMAGE_TAG=1.0.0
 ```
 
 ### **Option B: Step-by-Step Setup**
@@ -91,8 +91,8 @@ make build-api IMAGE_TAG=1.0.0
 #### **5. Start the Database and API**
 
 ```bash
-make start-db    # Start the database first
-make start-api   # Then start the API
+make start-db                    # Start the database first
+make start-api IMAGE_TAG=1.0.0   # Then start the API
 ```
 
 
