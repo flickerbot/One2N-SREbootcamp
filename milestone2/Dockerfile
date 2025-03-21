@@ -23,4 +23,4 @@ RUN chown -R flaskapp:flaskapp /app
 USER flaskapp
 ENV FLASK_APP=student.py
 ENV PATH=/home/flaskapp/.local/bin:$PATH
-CMD ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]
