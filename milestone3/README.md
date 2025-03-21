@@ -1,6 +1,6 @@
 # One2N-SREbootcamp
 
-## Milestone3- One-Click Local Development Setup
+## Milestone3 - One-Click Local Development Setup
 
 The purpose of this milestone is to streamline the local development setup for the API and its dependent services. By leveraging Docker Compose and Makefile, we aim to simplify the process of running the API with minimal manual intervention.
 
@@ -71,6 +71,7 @@ namevenv\Scripts\activate      # Windows
 #### **2. Install Dependencies**
 
 ```bash
+# installing dependencies specified in requirements file 
 make setup
 ```
 
@@ -79,12 +80,14 @@ make setup
 Ensure your local database is running, then:
 
 ```bash
+# Will run  migration on local db and updates the db schema 
 make migrate
 ```
 
 #### **4. Build the Docker Image**
 
 ```bash
+# It will build the Docker container with the specified IMAGE_TAG
 make build-api IMAGE_TAG=1.0.0
 ```
 
@@ -92,15 +95,15 @@ make build-api IMAGE_TAG=1.0.0
 
 ```bash
 make start-db                    # Start the database first
-make start-api IMAGE_TAG=1.0.0   # Then start the API
+make start-api IMAGE_TAG=1.0.0   # Start the API
 ```
 
 
 #### **Cleanup Resources**
 
-To stop and remove all containers and volumes:
-
+ 
 ```bash
+# To stop and remove all containers and volumes: 
 make clean
 ```
 
