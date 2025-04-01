@@ -2,6 +2,7 @@
 # Define all phony targets (targets that don't represent files)
 .PHONY: docker-build test lint
 
+
 # Setup local development environment with required Python packages
 # Use this when working on the codebase locally without Docker
 setup:
@@ -17,10 +18,16 @@ docker-build:
 	docker build -t student:$(IMAGE_TAG) .
 	@echo "Docker image built successfully."
 
+# Run tests using unittest
 test:
-    @echo "Running tests"
+	@echo "Running tests..."
 	python -m unittest test.py
 
+# Perform linting using pylint
 lint:
-	@echo "Running linting ..."
+	@echo "Running linting..."
 	pylint student.py
+
+env:
+	cp .env.example .env;
+
