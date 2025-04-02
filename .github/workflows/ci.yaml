@@ -30,16 +30,16 @@ jobs:
 
   test:
     runs-on: self-hosted
-    needs: setup  # Make sure setup is completed before running test
+    needs: build  # Make sure setup is completed before running test
     steps:
     - name: Run tests
       working-directory: milestone4
       run: make test
       # running the tests, refer makefile if wanna know what this command do 
 
-  Linting:
+  linting:
     runs-on: self-hosted
-    needs: setup # Ensure setup is done before linting 
+    needs: build # Ensure setup is done before linting 
     steps:
     - name: Perform code linting with pylint
       working-directory: milestone4
@@ -48,7 +48,7 @@ jobs:
       
   docker-login:
     runs-on: self-hosted
-    needs: [setup, lint]  # Ensure setup and linting are done before docker build
+    needs: [build, linting]  # Ensure setup and linting are done before docker build
     env:  
       DOCKER_TAG: ${{ github.sha }}
       #passing custome tag in the env, that will be passed as tag to dockerhub 
