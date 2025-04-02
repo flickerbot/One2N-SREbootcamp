@@ -13,8 +13,9 @@ on:
 jobs:
   build:
     runs-on: self-hosted
+    
     env:  
-    DOCKER_TAG: ${{ github.sha }}
+      DOCKER_TAG: ${{ github.sha }}
     #this lets us to run github on self-hosted machine, if we are using github workflows we can use ubuntu-latest here 
 
     steps:
