@@ -48,7 +48,7 @@ jobs:
       
   docker-login:
     runs-on: self-hosted
-    needs: [build, linting]  # Ensure setup and linting are done before docker build
+    needs: [build, linting,test]  # Ensure setup and linting are done before docker build
     env:  
       DOCKER_TAG: ${{ github.sha }}
       #passing custome tag in the env, that will be passed as tag to dockerhub 
