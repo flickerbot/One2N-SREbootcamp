@@ -48,4 +48,4 @@ jobs:
         
     - name: Docker build
       working-directory: milestone4
-      run: make docker-build DOCKER_TAG: ${{ github.sha }}
+      run: make docker-build DOCKER_TAG=$DOCKER_TAG
