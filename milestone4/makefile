@@ -1,33 +1,44 @@
+# Variables
+VENV_NAME := namevenv
+PYTHON := python3
+PIP := $(VENV_NAME)/bin/pip
+PYTHON_VENV := $(VENV_NAME)/bin/python
+LINT := $(VENV_NAME)/bin/pylint
+PYTEST := $(VENV_NAME)/bin/pytest
+DOCKER_REPO := flickerbot/student
+
 
 # Define all phony targets (targets that don't represent files)
 .PHONY: docker-build test lint
 
 
-# Setup local development environment with required Python packages
-# Use this when working on the codebase locally without Docker
-setup:
+# Create virtual environment
+$(VENV_NAME):
+	$(PYTHON) -m venv $(VENV_NAME)
+
+
+# Setup local development environment with required Python packages, 
+#we are setting up the venv then we are installing all the dependencies 
+
+setup:$(VENV_NAME)
 	@echo "Installing dependencies..."
-	pip install -r requirements.txt
-       
-
-# Build the API Docker image with specified tag
-# Usage: make build-api IMAGE_TAG=1.0.0
-
-docker-build:
-	@echo "Building Docker image $(IMAGE_TAG)..."
-	docker build -t student:$(IMAGE_TAG) .
-	@echo "Docker image built successfully."
+	$(PIP) install -r requirements.txt
+	
+# Perform linting using pylint
+lint:
+	@echo "Running linting..."
+	$(LINT) student.py
 
 # Run tests using unittest
 test:
 	@echo "Running tests..."
-	python -m unittest test.py
-
-# Perform linting using pylint
-lint:
-	@echo "Running linting..."
-	pylint student.py
+	$(PYTHON_VENV) -m unittest test.py
 
 env:
 	cp .env.example .env;
+
+docker-build:
+	@echo "Building and pushing Docker image with tag: $(DOCKER_TAG)"
+	docker build -t $(DOCKER_REPO):$(DOCKER_TAG) .
+	docker push $(DOCKER_REPO):$(DOCKER_TAG)
 
