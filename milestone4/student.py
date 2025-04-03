@@ -49,7 +49,7 @@ class Student(db.Model):
     age = db.Column(db.Integer, nullable=False)
     grade = db.Column(db.String(10), nullable=False)
 
-#comment for testing ci pipeline 1
+#comment for testing ci 
 # Initialize database tables
 with app.app_context():
     db.create_all()
