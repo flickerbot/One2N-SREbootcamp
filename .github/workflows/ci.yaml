@@ -10,11 +10,13 @@ on:
 
   workflow_dispatch:  # Allows manual triggering of the workflow
 
-runs-on: self-hosted
-       #this lets us to run github on self-hosted machine, if we are using github workflows we can use ubuntu-latest here 
 
 jobs:
+
   build:   
+    runs-on: self-hosted
+       #this lets us to run github on self-hosted machine, if we are using github workflows we can use ubuntu-latest here 
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -28,32 +30,22 @@ jobs:
       working-directory: milestone4
       run: make env
 
-  test:
-    needs: build  # Make sure setup is completed before running test
-    steps:
     - name: Run tests
       working-directory: milestone4
       run: make test
       # running the tests, refer makefile if wanna know what this command do 
 
-  linting:
-    needs: build # Ensure setup is done before linting 
-    steps:
     - name: Perform code linting with pylint
       working-directory: milestone4
       run: make lint
       # running tcode linting using pylint 
-      
-  docker-login:
-    needs: [build,linting,test]  # Ensure setup and linting are done before docker build
-    env:  
+
+    - name: Docker login
+      env:  
       DOCKER_TAG: ${{ github.sha }}
-      #passing custom tag in the env fir details you can refer to readme.md, 
+      #passing custom tag in the env for details you can refer to readme.md, 
       #that will be passed as tag to dockerhub
 
- 
-    steps:
-    - name: Docker login
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
