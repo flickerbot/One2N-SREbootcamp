@@ -93,5 +93,3 @@ vagrant destroy  # Remove the VM
 - [Deploying Nginx using Docker](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-docker)
 - [How to use Nginx Docker image](https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image)
 
-
-```
