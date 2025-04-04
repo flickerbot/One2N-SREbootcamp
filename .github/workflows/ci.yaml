@@ -2,11 +2,11 @@ name: CI for Milestone 4
 
 on:
   push:
-    #paths: [ milestone4/student.py ]
-    branches: [ milestone4 ]
-  pull_request:
-    #paths: [ milestone4/student.py ]
-    branches: [ milestone4 ]
+    paths: [ milestone4 ]
+    branches: [ main ]
+  # pull_request:
+  #   #paths: [ milestone4/student.py ]
+  #   branches: [ milestone4 ]
 
   workflow_dispatch:  # Allows manual triggering of the workflow
 
