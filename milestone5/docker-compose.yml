@@ -1,0 +1,67 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "${MYSQL_PORT_HOST}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+  
+  api:
+    image: flickerbot/student:${IMAGE_TAG}
+    container_name: api
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FLASK_HOST: ${FLASK_HOST}
+      FLASK_PORT: ${FLASK_PORT}
+      DATABASE_URL: "mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}"
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS}
+
+    ports:
+      - "5000:5000"
+    entrypoint: ["/app/entrypoint.sh"]
+   
+  api1:
+    image: flickerbot/student:${IMAGE_TAG}
+    container_name: api1
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FLASK_HOST: ${FLASK_HOST}
+      FLASK_PORT: ${FLASK_PORT}
+      DATABASE_URL: "mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}"
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS}
+
+    ports:
+      - "5001:5000"
+    entrypoint: ["/app/entrypoint.sh"]
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api1
+      - api
+volumes:
+  db_data:
