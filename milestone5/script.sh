@@ -36,12 +36,34 @@ sudo systemctl start docker
 }
 
 
+run_make_commands() {
+
+ # Change to the directory containing the Makefile
+  cd /app
+  
+  #setting up the env 
+  make env
+
+  # Run make deploy command
+  make deploy
+  
+  ## Wait for services to fully start 
+  sleep 10
+  
+  # Check status of services
+  make status
+  
+  # Display service logs
+  make logs
+}
+
 
 main(){
     echo "Starting provisioning process..."
    sudo apt-get update 
     install_make
     install_docker
+    run_make_commands
 }
 
 
