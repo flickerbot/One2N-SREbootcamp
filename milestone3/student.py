@@ -20,7 +20,7 @@ MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 
 # Database engine URL
 engine_url = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}"
-
+#this is for testing 
 # Create the database if it doesn't exist
 try:
     engine = create_engine(engine_url)
