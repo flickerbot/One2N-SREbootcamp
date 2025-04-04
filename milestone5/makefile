@@ -9,9 +9,13 @@ status:
 	@echo "Checking container status..."
 	docker compose ps
 
-# View logsS
+# View logs
 logs:
 	@echo "Showing logs..."
 	docker compose logs -f
+
+# setup env file in virtialbox
+env:
+	cp .env.example .env;
 
 
