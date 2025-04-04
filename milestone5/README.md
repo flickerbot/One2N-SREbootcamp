@@ -15,7 +15,9 @@
 ├── script.sh          # Provisioning script
 ├── docker-compose.yml # Docker services configuration
 ├── Makefile           # Deployment commands
+├── .env.example       # Env file with all required variables 
 └── README.md          # This file
+
 ```
 
 
@@ -75,6 +77,7 @@ The Makefile provides simple commands to manage the deployment:
 - `make deploy`: Start all services
 - `make status`: Check the status of all containers
 - `make logs`: View the logs from all services
+- `make env` : copy env.example file and rename it to env 
 
 
 
@@ -93,3 +96,5 @@ vagrant destroy  # Remove the VM
 - [Deploying Nginx using Docker](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-docker)
 - [How to use Nginx Docker image](https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image)
 
+
+```
