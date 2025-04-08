@@ -1,70 +1,79 @@
----
-
 apiVersion: v1
-kind: Service
+kind: Namespace
 metadata:
-  name: db
-  namespace: student-apis
-  labels:
-    app: mysql
-spec:
-  ports:
-  - port: 3306
-    targetPort: 3306
-    protocol: TCP
-  selector:
-    app: mysql
-
+  name: student-apis
 ---
-
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: student-api-config
   namespace: student-apis
-  labels:
-    app: student-api
 data:
-  # Server configuration
   FLASK_HOST: "0.0.0.0"
   FLASK_PORT: "5000"
   FLASK_APP: "student.py"
-  
-  # MySQL Database configuration
   MYSQL_HOST: "db"
   MYSQL_PORT: "3306"
   MYSQL_DATABASE: "student_db"
-  
-  # Migration control
   RUN_MIGRATIONS: "true"
-
---- 
-
-
+---
 apiVersion: v1
 kind: Secret
 metadata:
   name: student-api-secrets
   namespace: student-apis
-  labels:
-    app: student-api
 type: Opaque
 stringData:
   MYSQL_ROOT_PASSWORD: "rootpassword"
   MYSQL_USER: "admin"
   MYSQL_PASSWORD: "password"
-  DATABASE_URL: "mysql://admin:password@db:3306/student_db"
-  #DATABASE_URL: "mysql://admin:password@db.student-apis.svc.cluster.local:3306/student_db"
+  DATABASE_URL: "mysql+pymysql://admin:password@db.student-api.svc.cluster.local:3306/student_db"
 ---
-
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: db-persistent-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/mysql"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: student-apis
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: student-apis
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: mysql
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
   namespace: student-apis
-  labels:
-    app: mysql
 spec:
   replicas: 1
   selector:
@@ -76,32 +85,37 @@ spec:
         app: mysql
     spec:
       containers:
-      - name: mysql
-        image: mysql:8.0
-        args:
-        - "--bind-address=0.0.0.0"
-        ports:
-        - containerPort: 3306
-        name: mysql
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: student-api-secrets
-              key: MYSQL_ROOT_PASSWORD
-        - name: MYSQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: student-api-secrets
-              key: MYSQL_USER
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: student-api-secrets
-              key: MYSQL_PASSWORD
-        - name: MYSQL_DATABASE
-          valueFrom:
-            configMapKeyRef:
-              name: student-api-config
-              key: MYSQL_DATABASE
-
+        - name: mysql
+          image: mysql:8.0
+          args:
+            - "--bind-address=0.0.0.0"
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-secrets
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-secrets
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: student-api-config
+                  key: MYSQL_DATABASE
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
