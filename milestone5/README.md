@@ -3,20 +3,16 @@
 ## Milestone 5 - Setting up REST API & its dependent services on bare metal
 
 
-## Prerequisites
-
-- [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-- [Vagrant](https://www.vagrantup.com/downloads)
-
 ## Project Structure
 
 ```
-├── Vagrantfile        # Vagrant configuration
-├── script.sh          # Provisioning script
-├── docker-compose.yml # Docker services configuration
-├── Makefile           # Deployment commands
-├── .env.example       # Env file with all required variables 
-└── README.md          # This file
+├── Vagrantfile                      # Vagrant configuration
+├── script.sh                        # Provisioning script
+├── install-virtualbox-vagrant.sh    # Script to install vagarant and virtualbox on local machine 
+├── docker-compose.yml               # Docker services configuration
+├── Makefile                         # Deployment commands
+├── .env.example                     # Env file with all required variables 
+└── README.md                        # This file
 
 ```
 
@@ -29,8 +25,16 @@ cd One2N-SREbootcamp/milestone5
 
 ```
 
+### 2. Installing vagrant and VirtualBox 
+```bash
+chmod +x install-virtualbox-vagrant.sh
+./install-virtualbox-vagrant.sh
 
-### 2. Create Vagrant VM
+#this will install virtualbbox and vagrant machine on your local 
+```
+
+
+### 3. Create Vagrant VM
 
 From the project root directory, run:
 
@@ -40,7 +44,6 @@ vagrant up
 # and setup our application in a virtual machine based environment 
 
 ```
-
 
 ### Accessing the API
 
@@ -95,6 +98,3 @@ vagrant destroy  # Remove the VM
 - [Vagrant Docs](https://developer.hashicorp.com/vagrant/docs)
 - [Deploying Nginx using Docker](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-docker)
 - [How to use Nginx Docker image](https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image)
-
-
-```
