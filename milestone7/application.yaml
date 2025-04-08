@@ -7,7 +7,7 @@ metadata:
   labels:
     app: student-apis
 
-
+---
 
 # Service for Application
 apiVersion: v1
@@ -45,6 +45,16 @@ spec:
       labels:
         app: student-api
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: type
+                    operator: In
+                    values:
+                      - database
+
       containers:
       - name: student-api
         image: flickerbot/student:testv1
