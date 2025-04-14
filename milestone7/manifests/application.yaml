@@ -1,5 +1,4 @@
----
-
+# Create a dedicated namespace for isolating student API resources
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -9,7 +8,7 @@ metadata:
 
 ---
 
-# Service for Application
+# Define a NodePort service to expose the student API to external traffic
 apiVersion: v1
 kind: Service
 metadata:
@@ -18,15 +17,18 @@ metadata:
   labels:
     app: student-api
 spec:
-  type: NodePort
+  type: NodePort        # Exposes the service on a static port on each Node
   ports:
-  - port: 5000
-    targetPort: 5000
-    nodePort: 30080
+  - port: 5000          # Port exposed by the service inside the cluster
+    targetPort: 5000    # Port on the container the traffic is directed to
+    nodePort: 30080     # External port to access the app on the browser (e.g., MinikubeNodeIP:30080) 
   selector:
-    app: student-api
----
+    app: student-api    # Matches the pods with this label
 
+
+
+---
+# Deployment for the student API app with 2 replicas
 
 apiVersion: apps/v1
 kind: Deployment
@@ -36,7 +38,7 @@ metadata:
   labels:
     app: student-api
 spec:
-  replicas: 2  
+  replicas: 2           # Number of pod replicas to maintain
   selector:
     matchLabels:
       app: student-api
@@ -45,6 +47,8 @@ spec:
       labels:
         app: student-api
     spec:
+     # Enforce node scheduling based on node labels
+     #The pods will be only launched on the Nodes having label type=application 
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -53,11 +57,15 @@ spec:
                   - key: type
                     operator: In
                     values:
-                      - application 
+                      - application # Ensure pods are scheduled on nodes with this label
+      
+      # Init container to run database migrations or other setup before main container starts to run db migrations 
+
       initContainers:
       - name: init-myservice
-        image: flickerbot/student:testv2
+        image: flickerbot/student:testv2  # base image for our flask app 
         env:
+        # Pull environment variables from ConfigMap and Secret
         - name: FLASK_HOST
           valueFrom:
             configMapKeyRef:
@@ -109,12 +117,14 @@ spec:
               name: student-api-config
               key: MYSQL_DATABASE
       containers:
+        # Main container running the student API Flask app 
       - name: student-api
         image: flickerbot/student:testv2
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 5000
+        - containerPort: 5000    # Flask app runs on port 5000 inside the container
         env:
+        # Same environment variables used in the init container
         - name: FLASK_HOST
           valueFrom:
             configMapKeyRef:
@@ -131,7 +141,7 @@ spec:
               name: student-api-config
               key: RUN_MIGRATIONS
         - name: In_INIT
-          value: "true"
+          value: "false"
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
@@ -165,6 +175,7 @@ spec:
 
 ---
 
+# ExternalSecret to sync secrets from Vault into Kubernetes Secret
 
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
@@ -172,12 +183,12 @@ metadata:
   name: student-api-vault-secret
   namespace: student-apis
 spec:
-  refreshInterval: "15s"
+  refreshInterval: "15s"       # We are syncing secrets from vault every 15s 
   secretStoreRef:
     name: vault-backend
-    kind: ClusterSecretStore
+    kind: ClusterSecretStore   # Reference to the Vault backend (ClusterSecretStore)
   target:
-   name: student-api-secrets
+   name: student-api-secrets   #The name of the Kubernetes Secret to be created/updated
   data:
   - secretKey: MYSQL_ROOT_PASSWORD
     remoteRef:

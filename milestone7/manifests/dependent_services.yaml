@@ -1,27 +1,44 @@
+# For using ESO there are multiple components needs to be installed we are installing all these 
+# dependencies using helm charts, for using ESO to access our vault secrets we create two resources 
+
+ 
+
+ # ClusterSecretStore defines how External Secrets Operator (ESO) connects to Vault.
+# It allows secrets to be synced from Vault to any namespace in the cluster.
+
+
 apiVersion: external-secrets.io/v1beta1
 kind: ClusterSecretStore
 metadata:
   name: vault-backend
-  namespace: external-secrets # ClusterSecretStore can live in the ESO namespace
-spec:
+  namespace: external-secrets # Namespace where this ClusterSecretStore lives (ESO's namespace)
   provider:
     vault:
-      server: "http://vault.vault.svc.cluster.local:8201"
-      path: "secret"
-      version: "v2"
+      server: "http://vault.vault.svc.cluster.local:8200"   # Internal DNS address of Vault service
+      path: "secret"                                        # Mount path of Vault's KV engine (the path in vault where we are creating the secret)
+      version: "v2"                                         # Using KV version 2
       auth:
         tokenSecretRef:
-          name: vault-token
-          key: token
-          namespace: external-secrets
+          name: vault-token                                 # Name of the Kubernetes Secret that holds Vault token 
+          key: token                                        # Key inside that Secret where the token is stored
+          namespace: external-secrets                       # Namespace where the Secret (vault-token) exists
+
     
---- 
+---
+
+# Kubernetes Secret that holds the Vault root token.
+# This is used by ESO to authenticate with Vault and access secrets.
+
 apiVersion: v1
 kind: Secret
 metadata:
-  name: vault-token
-  namespace: external-secrets
+  name: vault-token 
+  namespace: external-secrets                             # Same namespace as ClusterSecretStore and ESO controller
 type: Opaque
 stringData:
+<<<<<<< HEAD
   token: "<root_token for vault>"   
+=======
+  token: "<root_token for vault>"  
+>>>>>>> c476d4d (update dependent services files)
 ---
