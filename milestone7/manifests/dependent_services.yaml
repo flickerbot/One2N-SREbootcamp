@@ -36,13 +36,5 @@ metadata:
   namespace: external-secrets                             # Same namespace as ClusterSecretStore and ESO controller
 type: Opaque
 stringData:
-<<<<<<< HEAD
-<<<<<<< HEAD
   token: "<root_token for vault>"   
-=======
-  token: "<root_token for vault>"  
->>>>>>> c476d4d (update dependent services files)
-=======
-  #token: "<replace with your root token >"                   # Vault token with sufficient permissions to read from the 'secret' path
->>>>>>> 8f9a3de (comment root token)
 ---
