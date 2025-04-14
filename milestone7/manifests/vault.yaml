@@ -1,3 +1,5 @@
+# Create a separate namespace for Vault 
+
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -6,6 +8,7 @@ metadata:
     app: vault
 
 ---
+# Deploying Vault as a single replica Deployment
 
 apiVersion: apps/v1
 kind: Deployment
@@ -24,6 +27,8 @@ spec:
       labels:
         app: vault   
     spec:
+      securityContext:
+        fsGroup: 1000                    # Ensures Vault process can access the mounted volume with correct permissions
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -32,18 +37,27 @@ spec:
                   - key: type
                     operator: In
                     values:
-                      - dependent_services
+                      - dependent_services   # Schedule only on nodes labeled as 'dependent_services'
+      initContainers:
+       - name: fix-perms      # Init container used to fix permissions issue on mounted volume
+                              # Some storage plugins don't automatically set permissions as expected by Vault 
+         image: busybox     
+         command: ["sh", "-c", "chown -R 100:1000 /vault/data"]        # Give correct ownership of volume
+         volumeMounts:
+         - name: vault-data
+           mountPath: /vault/data
+
       containers:
         - name: vault
           image: hashicorp/vault:1.19
           args:
-            - "server"
-            - "-dev"
+            - "server"            #  running vault in prodcution ready mode, for testing we can add
+                                  # -dev mode with server for testing integration with other services
           env:
             - name: VAULT_LOCAL_CONFIG
-              value: |
+              value: |           # Vault server configuration passed directly via environment variable
                 listener "tcp" {
-                  address = "0.0.0.0:8201"
+                  address = "0.0.0.0:8200"   
                   tls_disable = 1
                 }
 
@@ -54,21 +68,26 @@ spec:
                 disable_mlock = true
 
                 ui = true
-                api_addr = "http://vault.vault.svc:8201"
+                api_addr = "http://vault.vault.svc:8200"     
+            - name: VAULT_ADDR
+              value: "http://127.0.0.1:8200"
+              
           ports:
-            - containerPort: 8201
+            - containerPort: 8200
               name: http
           volumeMounts:
             - name: vault-data
-              mountPath: /vault/data
+              mountPath: /vault/data       # Mount persistent storage here
           securityContext:
             capabilities:
               add: ["IPC_LOCK"]
       volumes:
         - name: vault-data
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: vault-data       # Mount path where Vault will store its data
 
 ---
+# Internal ClusterIP service to expose Vault on port 8200
 
 apiVersion: v1
 kind: Service
@@ -80,5 +99,21 @@ spec:
     app: vault
   ports:
     - name: http
-      port: 8201
-      targetPort: 8201
+      port: 8200                  # Service port
+      targetPort: 8200            # Container port
+
+---
+# PersistentVolumeClaim to provide storage to Vault
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-data
+  namespace: vault
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
