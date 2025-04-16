@@ -1,0 +1,208 @@
+# Create a dedicated namespace for isolating student API resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: student-apis
+  labels:
+    app: student-apis
+
+---
+
+# Define a NodePort service to expose the student API to external traffic
+apiVersion: v1
+kind: Service
+metadata:
+  name: student-api-service
+  namespace: student-apis
+  labels:
+    app: student-api
+spec:
+  type: NodePort        # Exposes the service on a static port on each Node
+  ports:
+  - port: 5000          # Port exposed by the service inside the cluster
+    targetPort: 5000    # Port on the container the traffic is directed to
+    nodePort: 30080     # External port to access the app on the browser (e.g., MinikubeNodeIP:30080) 
+  selector:
+    app: student-api    # Matches the pods with this label
+
+
+
+---
+# Deployment for the student API app with 2 replicas
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student-api
+  namespace: student-apis
+  labels:
+    app: student-api
+spec:
+  replicas: 2           # Number of pod replicas to maintain
+  selector:
+    matchLabels:
+      app: student-api
+  template:
+    metadata:
+      labels:
+        app: student-api
+    spec:
+     # Enforce node scheduling based on node labels
+     #The pods will be only launched on the Nodes having label type=application 
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: type
+                    operator: In
+                    values:
+                      - application # Ensure pods are scheduled on nodes with this label
+      
+      # Init container to run database migrations or other setup before main container starts to run db migrations 
+
+      initContainers:
+      - name: init-myservice
+        image: flickerbot/student:testv2  # base image for our flask app 
+        env:
+        # Pull environment variables from ConfigMap and Secret
+        - name: FLASK_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: FLASK_HOST
+        - name: FLASK_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: FLASK_PORT
+        - name: RUN_MIGRATIONS
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: RUN_MIGRATIONS
+        - name: IN_INIT
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: IN_INIT
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: student-api-secrets
+              key: DATABASE_URL
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: student-api-secrets
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: student-api-secrets
+              key: MYSQL_PASSWORD
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: MYSQL_PORT
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: MYSQL_DATABASE
+      containers:
+        # Main container running the student API Flask app 
+      - name: student-api
+        image: flickerbot/student:testv2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000    # Flask app runs on port 5000 inside the container
+        env:
+        # Same environment variables used in the init container
+        - name: FLASK_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: FLASK_HOST
+        - name: FLASK_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: FLASK_PORT
+        - name: RUN_MIGRATIONS
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: RUN_MIGRATIONS
+        - name: In_INIT
+          value: "false"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: student-api-secrets
+              key: DATABASE_URL
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: student-api-secrets
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: student-api-secrets
+              key: MYSQL_PASSWORD
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: MYSQL_PORT
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: student-api-config
+              key: MYSQL_DATABASE
+
+---
+
+# ExternalSecret to sync secrets from Vault into Kubernetes Secret
+
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: student-api-vault-secret
+  namespace: student-apis
+spec:
+  refreshInterval: "15s"       # We are syncing secrets from vault every 15s 
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore   # Reference to the Vault backend (ClusterSecretStore)
+  target:
+   name: student-api-secrets   #The name of the Kubernetes Secret to be created/updated
+  data:
+  - secretKey: MYSQL_ROOT_PASSWORD
+    remoteRef:
+      key: student-api/db
+      property: MYSQL_ROOT_PASSWORD
+  - secretKey: MYSQL_USER
+    remoteRef:
+      key: student-api/db
+      property: MYSQL_USER
+  - secretKey: MYSQL_PASSWORD
+    remoteRef:
+      key: student-api/db
+      property: MYSQL_PASSWORD
+  - secretKey: DATABASE_URL
+    remoteRef:
+      key: student-api/db
+      property: DATABASE_URL
