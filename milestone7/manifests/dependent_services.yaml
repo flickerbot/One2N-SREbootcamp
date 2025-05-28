@@ -7,7 +7,7 @@
 # It allows secrets to be synced from Vault to any namespace in the cluster.
 
 
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
   name: vault-backend
@@ -36,5 +36,5 @@ metadata:
   namespace: external-secrets                             # Same namespace as ClusterSecretStore and ESO controller
 type: Opaque
 stringData:
-  token: "<root_token for vault>"   
+  token: "<root-token>"  
 ---

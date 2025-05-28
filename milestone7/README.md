@@ -239,7 +239,7 @@ minikube ip
 kubectl get nodes -o wide
 
 # Access the API
-curl http://<node-ip>:30080/api/students
+curl http://<node-ip>:30080/api/v1/students
 ```
 
 
