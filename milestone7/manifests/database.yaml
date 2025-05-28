@@ -1,0 +1,171 @@
+
+# Namespace for isolating all student API related resources 
+# We are deploying both API and DB in same NS -student-apis
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: student-apis
+
+---
+
+# ConfigMap for environment variables used by both FLASK-API and MySQL containers
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: student-api-config
+  namespace: student-apis
+data:
+  FLASK_HOST: "0.0.0.0"       
+  FLASK_PORT: "5000"
+  FLASK_APP: "student.py"
+  MYSQL_HOST: "db"             # Hostname of MySQL service via which db can be communicated 
+  MYSQL_PORT: "3306"
+  MYSQL_DATABASE: "student_db"
+  RUN_MIGRATIONS: "true"       # Flag used by the app/init container to run DB migrations
+  IN_INIT: "true"              # this is for init-container we are running db migrate script only for 
+                               # init container and passing the flag from here 
+
+---
+# PersistentVolume (PV) with manual storage provisioning attached to db pods 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: db-persistent-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi                # Total size of the volume 
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/mysql"      # Local path on the host node 
+
+
+
+---
+# PersistentVolumeClaim (PVC) to request storage from the PV above
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: student-apis
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+
+
+---
+# Service to expose MySQL within the cluster (not exposed outside)
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: student-apis
+spec:
+  ports:
+    - port: 3306         # Port to access MySQL inside the cluster
+      targetPort: 3306
+  selector:
+    app: mysql           # Matches pods with label `app: mysql`
+
+
+
+---
+# MySQL Deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: student-apis
+spec:
+  replicas: 1          # Number of pod replicas to maintain
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+     # Enforce node scheduling based on node labels
+     #The pods will be only launched on the Nodes having label type=application
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: type
+                    operator: In
+                    values:
+                      - database
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          args:
+            - "--bind-address=0.0.0.0"    # Allow connections from any address indside the container 
+          ports:
+            - containerPort: 3306
+          env:
+           # Secrets and config reference for initializing the DB
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-secrets
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-secrets
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: student-api-config
+                  key: MYSQL_DATABASE
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql    # Mount the volume where MySQL stores data
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+
+
+
+
+
+
+
+
+
+# If you're testing secrets **without using External Secrets Operator (ESO)**,
+# uncomment the following block and apply it.
+# Reference this secret in your deployment and database instead of using ExternalSecret.
+
+
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: student-api-secrets
+#   namespace: student-apis
+# type: Opaque
+# stringData:
+#   MYSQL_ROOT_PASSWORD: "rootpassword"
+#   MYSQL_USER: "admin"
+#   MYSQL_PASSWORD: "password"
+#   # DATABASE_URL: "mysql+pymysql://admin:password@db.student-api.svc.cluster.local:3306/student_db"
+#   DATABASE_URL: "mysql+pymysql://admin:password@db:3306/student_db"
+# ---
